@@ -555,7 +555,7 @@ def loadConfig():
                 + Fore.RESET
                 + Style.BRIGHT)
 
-        # Check wheter efficiency is correct
+        # Check whether efficiency is correct
         efficiency = sub(r"\D", "", efficiency)
         if efficiency == "":
             efficiency = 95
@@ -564,7 +564,7 @@ def loadConfig():
         elif float(efficiency) < int(1):
             efficiency = 1
 
-        # Check wheter threadcount is correct
+        # Check whether threadcount is correct
         threadcount = sub(r"\D", "", threadcount)
         if threadcount == "":
             threadcount = cpu_count()
@@ -577,13 +577,13 @@ def loadConfig():
         elif int(threadcount) < int(1):
             threadcount = 1
 
-        # Check wheter algo setting is correct
+        # Check whether algo setting is correct
         if algorithm == "2":
             algorithm = "XXHASH"
         else:
             algorithm = "DUCO-S1"
 
-        # Check wheter diff setting is correct
+        # Check whether diff setting is correct
         if requested_diff == "1":
             requested_diff = "LOW"
         elif requested_diff == "2":
@@ -591,7 +591,7 @@ def loadConfig():
         else:
             requested_diff = "NET"
 
-        # Check wheter donation_level is correct
+        # Check whether donation_level is correct
         donation_level = sub(r"\D", "", donation_level)
         if donation_level == "":
             donation_level = 1
