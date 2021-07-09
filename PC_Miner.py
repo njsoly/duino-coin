@@ -1177,13 +1177,17 @@ def Thread(
                         break
                     break
             except Exception as e:
+                trace_back = sys.exc_info()[2]
+                line = trace_back.tb_lineno
                 pretty_print(
                     "net"
                     + str(threadid),
                     getString("error_while_mining")
                     + Style.NORMAL
                     + Fore.RESET
-                    + " (mining err: "
+                    + " (mining err (line "
+                    + line
+                    + "): "
                     + str(e)
                     + ")",
                     "error")
