@@ -751,6 +751,9 @@ def ducos1xxh(
             timeDelta = timeStop - timeStart
             hashrate = ducos1xxres / timeDelta
             return [ducos1xxres, hashrate]
+    timeDelta = time() - timeStart
+    hashrate = ducos1xxres / timeDelta
+    return [ducos1xxres, hashrate]
 
 
 def Thread(
