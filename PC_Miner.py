@@ -910,7 +910,7 @@ def Thread(
                                      "Correct job received")
                         break
                     except:
-                        print('jobs(' + str(len(job)) + '): ' + str(job))
+                        # print('jobs(' + str(len(job)) + '): ' + str(job))
                         if len(job) > 1:
                             nodeMsg = job[1]
                         else:
