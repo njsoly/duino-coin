@@ -22,6 +22,6 @@ print('jobsList: ' + str(jobsList))
 result = None
 if result is not None:
     print("Thread "
-                + str(0)
-                + ": result found: "
-                + str(result[0]))
+        + str(0)
+        + ": result found: "
+        + str(result[0]))

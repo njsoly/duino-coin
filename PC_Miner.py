@@ -1202,7 +1202,7 @@ def Thread(
                     + ")",
                     "error")
                 debug_output("Error while mining: " + str(e))
-                sleep(5)
+                sleep(3)
                 break
 
 
