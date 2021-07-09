@@ -1186,7 +1186,7 @@ def Thread(
                     + Style.NORMAL
                     + Fore.RESET
                     + " (mining err (line "
-                    + line
+                    + str(line)
                     + "): "
                     + str(e)
                     + ")",
