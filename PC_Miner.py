@@ -932,7 +932,7 @@ def Thread(
                     computetimeStop = time()
                     computetime = computetimeStop - computetimeStart
 
-                    if len(result) > 0:
+                    if result is not None:
                         debug_output("Thread "
                                     + str(threadid)
                                     + ": result found: "

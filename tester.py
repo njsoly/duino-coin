@@ -19,3 +19,9 @@ print('jobsList: ' + str(jobsList))
 jobsList = jobs.split(',')
 print('jobsList: ' + str(jobsList))
 
+result = None
+if result is not None:
+    print("Thread "
+                + str(0)
+                + ": result found: "
+                + str(result[0]))
