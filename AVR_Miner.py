@@ -227,6 +227,12 @@ def get_fastest_connection(server_ip: str):
     connection_pool = []
     available_connections = []
 
+    pretty_print("net0",
+                " "
+                + get_string("connection_search")
+                + "...",
+                "warning")
+
     for i in range(len(AVAILABLE_PORTS)):
         connection_pool.append(socket())
         connection_pool[i].setblocking(0)
@@ -423,7 +429,7 @@ def load_config():
         debug = config['Duino-Coin-AVR-Miner']['debug']
         rig_identifier = config['Duino-Coin-AVR-Miner']['identifier']
         SOC_TIMEOUT = int(config["Duino-Coin-AVR-Miner"]["soc_timeout"])
-        AVR_TIMEOUT = float(config["Duino-Coin-AVR-Miner"]["soc_timeout"])
+        AVR_TIMEOUT = float(config["Duino-Coin-AVR-Miner"]["avr_timeout"])
         discord_presence = config["Duino-Coin-AVR-Miner"]["discord_presence"]
         shuffle_ports = config["Duino-Coin-AVR-Miner"]["shuffle_ports"]
 
@@ -752,7 +758,7 @@ def mine_avr(com, threadid):
                                 'warning')
                             sleep(10)
 
-                        soc.send(bytes("MOTD", encoding="utf8"))
+                        soc.send(bytes("MOTD", encoding="ascii"))
                         motd = soc.recv(1024).decode().rstrip("\n")
                         pretty_print("net" + str(threadid),
                                      " MOTD: "
@@ -792,7 +798,7 @@ def mine_avr(com, threadid):
                         'JOB,'
                         + str(username)
                         + ',AVR',
-                        encoding='utf8'))
+                        encoding='ascii'))
 
                 # Retrieve work
                 job = soc.recv(128).decode().rstrip("\n")
@@ -852,7 +858,7 @@ def mine_avr(com, threadid):
                                             job[0]
                                             + ',' + job[1]
                                             + ',' + job[2]
-                                            + ','), encoding='utf8'))
+                                            + ','), encoding='ascii'))
 
                                 debug_output(com + ': reading result from AVR')
                                 result = ser.read_until(b'\n').decode().strip()
@@ -956,14 +962,14 @@ def mine_avr(com, threadid):
                             bytes(
                                 str(result[0])
                                 + ','
-                                + str(hashrate)
+                                + str(hashrate_t)
                                 + ',Official AVR Miner (DUCO-S1A) v'
                                 + str(MINER_VER)
                                 + ','
                                 + str(rig_identifier)
                                 + ','
                                 + str(chipID),
-                                encoding='utf8'))
+                                encoding='ascii'))
                     except Exception as e:
                         pretty_print(
                             'net'
