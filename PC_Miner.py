@@ -932,10 +932,15 @@ def Thread(
                     computetimeStop = time()
                     computetime = computetimeStop - computetimeStart
 
-                    debug_output("Thread "
-                                 + str(threadid)
-                                 + ": result found: "
-                                 + str(result[0]))
+                    if len(result) > 0:
+                        debug_output("Thread "
+                                    + str(threadid)
+                                    + ": result found: "
+                                    + str(result[0]))
+                    else:
+                        debug_output("Thread "
+                                    + str(threadid)
+                                    + ": result found, but not here...")
 
                     # Convert to kH/s
                     threadhashcount = int(result[1] / 1000)
