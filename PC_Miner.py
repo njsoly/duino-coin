@@ -911,11 +911,15 @@ def Thread(
                         break
                     except:
                         print('jobs(' + str(len(job)) + '): ' + str(job))
+                        if len(job) > 1:
+                            nodeMsg = job[1]
+                        else:
+                            nodeMsg = ''
                         pretty_print("cpu" + str(threadid),
                                      " Node message: "
-                                     + job[1],
+                                     + nodeMsg,
                                      "warning")
-                        sleep(3)
+                        sleep(2.5)
 
                 while True:
                     computetimeStart = time()

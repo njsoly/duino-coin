@@ -15,3 +15,7 @@ print('do this do that' + str(5) + ' aosnetuh')
 jobs = 'snthsnthxsnthsnthxsnthsnth'
 jobsList = jobs.split('x')
 print('jobsList: ' + str(jobsList))
+
+jobsList = jobs.split(',')
+print('jobsList: ' + str(jobsList))
+
