@@ -910,6 +910,7 @@ def Thread(
                                      "Correct job received")
                         break
                     except:
+                        print('jobs(' + str(len(job)) + '): ' + str(job))
                         pretty_print("cpu" + str(threadid),
                                      " Node message: "
                                      + job[1],
