@@ -30,6 +30,8 @@ from multiprocessing import Lock
 from random import choice
 import pip
 import select
+import testerlib as njs
+from testerlib import log as log
 
 thread_lock = Lock()
 
@@ -233,6 +235,8 @@ def handler(signal_received, frame):
             + Fore.RESET
             + getString("goodbye"),
             "warning")
+        # TODO does this work?
+        njs.log("quitting mining at " + njs.getDateTime_pretty())
     try:
         # Close previous socket connection (if any)
         socket.close()
@@ -364,6 +368,7 @@ def Greeting():
         + algorithm
         + " ⚙ "
         + diffName)
+    log("starting up with algorithm " + str(algorithm) + " at " + njs.getDateTime_pretty())
 
     if rig_identiier != "None":
         print(
