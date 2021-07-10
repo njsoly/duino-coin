@@ -1437,11 +1437,7 @@ if __name__ == "__main__":
             "error")
         debug_output("Error displaying greeting message: " + str(e))
 
-    try:
-        # Start donation thread
-        Donate()
-    except Exception as e:
-        debug_output("Error launching donation thread: " + str(e))
+    # Donation chunk used to be here
 
     NODE_ADDRESS, NODE_PORT = fetch_pools()
 
