@@ -927,7 +927,7 @@ def Thread(
                                      " Node message: "
                                      + nodeMsg,
                                      "warning")
-                        sleep(2.5)
+                        sleep(4)
 
                 while True:
                     computetimeStart = time()
