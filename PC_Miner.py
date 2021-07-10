@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+!/usr/bin/env python3
 ##########################################
 # Duino-Coin Python PC Miner (v2.5.5)
 # https://github.com/revoxhere/duino-coin
@@ -120,7 +120,9 @@ AVAILABLE_PORTS = [
     2814,  # PC (2)
     2815,   # PC (3)
     2812,  # Wallets, other miners
-    2811  # Legacy
+    2811,  # Legacy
+    2816,
+    2817
 ]
 SOC_TIMEOUT = 45  # Socket timeout
 RESOURCES_DIR = "PCMiner_" + str(MINER_VER) + "_resources"
