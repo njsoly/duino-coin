@@ -46,7 +46,7 @@ def logLines(lines):
 
 def log(line):
     with open(logFileName, "at") as log:
-        log.write(line)
+        log.write(line + "\n")
 
 def getPwd():
     pwd = Path(".").absolute()
