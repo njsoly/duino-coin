@@ -343,6 +343,7 @@ def Greeting():
             + str(threadcount)
             + "x "
             + str(cpu["brand_raw"]))
+        log("Using " + str(cpu["brand_raw"]) + " - " + str(threadcount) + " threads")
     except Exception as e:
         debug_output("Error displaying CPU message: " + str(e))
 
@@ -1249,6 +1250,7 @@ def pretty_print(message_type, message, state):
               + message
               + Style.NORMAL
               + Fore.RESET)
+        log(message)
 
 
 def initRichPresence():

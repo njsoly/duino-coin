@@ -28,6 +28,9 @@ from pathlib import Path
 def getDateTime_pretty():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+def getTime_pretty():
+    return datetime.now().strftime("%H:%M:%S")
+
 def getDateTime_pretty_path():
     return datetime.now().strftime("%Y-%m-%d_%H%M%S")
 
@@ -42,11 +45,13 @@ def getTime_path():
 
 def logLines(lines):
     with open(logFileName, "at") as log:
+        for line in lines:
+            line = "[" + getTime_pretty() + "] " + line
         log.writelines(lines)
 
 def log(line):
     with open(logFileName, "at") as log:
-        log.write(line + "\n")
+        log.write("[" + getTime_pretty() + "] " + line + "\n")
 
 def getPwd():
     pwd = Path(".").absolute()
