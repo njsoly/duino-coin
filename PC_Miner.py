@@ -1,4 +1,4 @@
-!/usr/bin/env python3
+#!/usr/bin/env python3
 ##########################################
 # Duino-Coin Python PC Miner (v2.5.5)
 # https://github.com/revoxhere/duino-coin
