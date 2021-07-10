@@ -238,7 +238,7 @@ def handler(signal_received, frame):
             + getString("goodbye"),
             "warning")
         # TODO does this work?
-        njs.log("quitting mining at " + njs.getDateTime_pretty())
+        njs.log("quitting mining at " + njs.getDateTime_pretty() + "\n")
     try:
         # Close previous socket connection (if any)
         socket.close()
@@ -371,7 +371,7 @@ def Greeting():
         + algorithm
         + " ⚙ "
         + diffName)
-    log("starting up with algorithm " + str(algorithm) + " at " + njs.getDateTime_pretty())
+    log("\nstarting up with algorithm " + str(algorithm) + " at " + njs.getDateTime_pretty())
 
     if rig_identiier != "None":
         print(
