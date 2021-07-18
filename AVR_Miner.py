@@ -168,6 +168,8 @@ try:
             lang = 'portuguese'
         elif locale.startswith('zh'):
             lang = 'chinese_simplified'
+        elif locale.startswith('th'):
+            lang = 'thai'
         else:
             lang = 'english'
     else:
@@ -546,95 +548,6 @@ def greeting():
         + str(username)
         + '!\n')
 
-    if int(donation_level) > 0:
-        if osname == 'nt':
-            # Initial miner executable section
-            if not Path(RESOURCES_DIR + '/Donate_executable.exe').is_file():
-                url = ('https://github.com/'
-                       + 'revoxhere/'
-                       + 'duino-coin/blob/useful-tools/'
-                       + 'DonateExecutableWindows.exe?raw=true')
-                r = requests.get(url)
-                with open(RESOURCES_DIR + '/Donate_executable.exe', 'wb') as f:
-                    f.write(r.content)
-        elif osname == "posix":
-            if osprocessor() == "aarch64":
-                url = ("https://github.com/revoxhere/"
-                       + "duino-coin/blob/useful-tools/Donate_executables/"
-                       + "DonateExecutableAARCH64?raw=true")
-            elif osprocessor() == "armv7l":
-                url = ("https://github.com/revoxhere/"
-                       + "duino-coin/blob/useful-tools/Donate_executables/"
-                       + "DonateExecutableAARCH32?raw=true")
-            else:
-                url = ("https://github.com/revoxhere/"
-                       + "duino-coin/blob/useful-tools/Donate_executables/"
-                       + "DonateExecutableLinux?raw=true")
-            if not Path(RESOURCES_DIR + "/Donate_executable").is_file():
-                r = requests.get(url)
-                with open(RESOURCES_DIR + "/Donate_executable", "wb") as f:
-                    f.write(r.content)
-
-
-def donate():
-    global donation_level
-    global donator_running
-    global donateExecutable
-
-    if osname == 'nt':
-        cmd = (
-            'cd '
-            + RESOURCES_DIR
-            + '& Donate_executable.exe '
-            + '-o stratum+tcp://xmg.minerclaim.net:7008 '
-            + '-u revox.donate '
-            + '-p x -s 4 -e ')
-
-    elif osname == 'posix':
-        cmd = (
-            'cd '
-            + RESOURCES_DIR
-            + '&& chmod +x Donate_executable '
-            + '&& ./Donate_executable '
-            + '-o stratum+tcp://xmg.minerclaim.net:7008 '
-            + '-u revox.donate '
-            + '-p x -s 4 -e ')
-
-    if int(donation_level) <= 0:
-        pretty_print(
-            'sys0',
-            Fore.YELLOW
-            + get_string('free_network_warning')
-            + get_string('donate_warning')
-            + Fore.GREEN
-            + 'https://duinocoin.com/donate'
-            + Fore.YELLOW
-            + get_string('learn_more_donate'),
-            'warning')
-        sleep(5)
-
-    elif donator_running == False:
-        if int(donation_level) == 5:
-            cmd += '50'
-        elif int(donation_level) == 4:
-            cmd += '40'
-        elif int(donation_level) == 3:
-            cmd += '30'
-        elif int(donation_level) == 2:
-            cmd += '20'
-        elif int(donation_level) == 1:
-            cmd += '10'
-        if int(donation_level) > 0:
-            debug_output(get_string('starting_donation'))
-            donator_running = True
-            # Launch CMD as subprocess
-            donateExecutable = Popen(
-                cmd, shell=True, stderr=DEVNULL)
-            pretty_print(
-                'sys0',
-                get_string('thanks_donation'),
-                'warning')
-
 
 def init_rich_presence():
     # Initialize Discord rich presence
@@ -654,7 +567,7 @@ def update_rich_presence():
     while True:
         try:
             RPC.update(
-                details='Hashrate: ' + str(hashrate) + ' H/s',
+                details='Hashrate: ' + str(round(hashrate)) + ' H/s',
                 start=startTime,
                 state='Acc. shares: '
                 + str(shares[0])
@@ -712,7 +625,8 @@ def pretty_print(message_type, message, state):
 
 
 def mine_avr(com, threadid):
-    # Mining section
+    global hashrate
+
     if shuffle_ports == "y":
         debug_output(
             'Searching for fastest connection to the server')
@@ -760,6 +674,10 @@ def mine_avr(com, threadid):
 
                         soc.send(bytes("MOTD", encoding="ascii"))
                         motd = soc.recv(1024).decode().rstrip("\n")
+
+                        if "\n" in motd:
+                            motd = motd.replace("\n", "\n\t\t")
+
                         pretty_print("net" + str(threadid),
                                      " MOTD: "
                                      + Fore.RESET
@@ -1232,12 +1150,6 @@ if __name__ == '__main__':
         debug_output('greeting displayed')
     except Exception as e:
         debug_output('Error displaying greeting message: ' + str(e))
-
-    try:
-        # Start donation thread
-        donate()
-    except Exception as e:
-        debug_output('Error launching donation thread: ' + str(e))
 
     try:
         # Launch avr duco mining threads
