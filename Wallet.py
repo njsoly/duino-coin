@@ -1103,7 +1103,8 @@ def statistics_window(handler):
 def wrapper_window(handler):
     def Wrap():
         amount = amountWrap.get()
-        print("Got amount: ", amount)
+        print("Got amount:", amount)
+        print("pub key:", pub_key)
         soc = websocket.create_connection(WS_URI)
         soc.recv()
         try:
@@ -1123,7 +1124,8 @@ def wrapper_window(handler):
                     "WRAP,"
                     + str(amount)
                     + ","
-                    + str(pub_key),
+                    + str(pub_key)
+                    + str(",placeholder"),
                     encoding="utf8"))
             soc.close()
             sleep(2)
@@ -1235,7 +1237,8 @@ def unwrapper_window(handler):
                                 "UNWRAP,"
                                 + str(amount)
                                 + ","
-                                + str(pub_key),
+                                + str(pub_key)
+                                + str(",placeholder"),
                                 encoding="utf8"))
 
                 soc.close()
@@ -2609,6 +2612,8 @@ try:
         lang = "italian"
     elif locale.startswith("zh"):
         lang = "chinese_simplified"
+    elif locale.startswith("th"):
+        lang = "thai"
     else:
         lang = "english"
 except IndexError:

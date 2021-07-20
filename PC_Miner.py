@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 ##########################################
-# Duino-Coin Python PC Miner (v2.5.5)
+# Duino-Coin Python PC Miner (v2.5.6)
 # https://github.com/revoxhere/duino-coin
 # Distributed under MIT license
 # © Duino-Coin Community 2019-2021
@@ -14,6 +14,7 @@ from json import load as jsonload
 from locale import LC_ALL, getdefaultlocale, getlocale, setlocale
 from os import _exit, execl, mkdir
 from os import name as osname
+from os import environ as osenviron
 from platform import machine as osprocessor
 from os import path, system
 from os import system as ossystem
@@ -113,7 +114,7 @@ except ModuleNotFoundError:
 
 
 # Global variables
-MINER_VER = "2.55"  # Version number
+MINER_VER = "2.56"  # Version number
 NODE_ADDRESS = "server.duinocoin.com"
 AVAILABLE_PORTS = [
     2813,  # PC (1)
@@ -125,8 +126,8 @@ AVAILABLE_PORTS = [
     2817
 ]
 SOC_TIMEOUT = 45  # Socket timeout
+PERIODIC_REPORT_TIME = 60
 RESOURCES_DIR = "PCMiner_" + str(MINER_VER) + "_resources"
-shuffle_ports = "y"
 donatorrunning = False
 debug = "n"
 discord_presence = "y"
@@ -137,7 +138,7 @@ config = ConfigParser()
 donation_level = 0
 thread = []
 totalhashrate_mean = []
-start_time = time()
+mining_start_time = time()
 
 # Create resources folder if it doesn't exist
 if not path.exists(RESOURCES_DIR):
@@ -186,6 +187,8 @@ try:
             lang = "italian"
         elif locale.startswith("zh"):
             lang = "chinese_simplified"
+        elif locale.startswith("th"):
+            lang = "thai"
         else:
             lang = "english"
     else:
@@ -217,14 +220,16 @@ def debug_output(text):
 
 
 def title(title):
-    # Set window title
-    if osname == "nt":
-        # Windows systems
-        system("title " + title)
-    else:
-        # Most standard terminals
-        print("\33]0;" + title + "\a", end="")
-        sys.stdout.flush()
+    # disable window title setter when running with nohup
+    if osenviron.get('_') != '/usr/bin/nohup':
+        # Set window title
+        if osname == "nt":
+            # Windows systems
+            system("title " + title)
+        else:
+            # Most standard terminals
+            print("\33]0;" + title + "\a", end="")
+            sys.stdout.flush()
 
 
 def handler(signal_received, frame):
@@ -250,11 +255,15 @@ def handler(signal_received, frame):
 def calculate_uptime(start_time):
     uptime = time() - start_time
     if uptime <= 59:
-        return round(uptime), "s"
+        return str(round(uptime)) + " seconds"
+    elif uptime == 60:
+        return str(round(uptime // 60)) + " minute"
     elif uptime >= 60:
-        return round(uptime // 60), "min"
+        return str(round(uptime // 60)) + " minutes"
+    elif uptime == 3600:
+        return str(round(uptime // 3600)) + " hour"
     elif uptime >= 3600:
-        return round(uptime // 3600), "h"
+        return str(round(uptime // 3600)) + " hours"
 
 
 def get_prefix(diff: int):
@@ -398,33 +407,6 @@ def Greeting():
         + str(username)
         + "!\n")
 
-    if int(donation_level) > 0:
-        if osname == "nt":
-            if not Path(RESOURCES_DIR + "/Donate_executable.exe").is_file():
-                url = ("https://github.com/revoxhere/"
-                       + "duino-coin/blob/useful-tools/Donate_executables/"
-                       + "DonateExecutableWindows.exe?raw=true")
-                r = requests.get(url)
-                with open(RESOURCES_DIR + "/Donate_executable.exe", "wb") as f:
-                    f.write(r.content)
-        elif osname == "posix":
-            if osprocessor() == "aarch64":
-                url = ("https://github.com/revoxhere/"
-                       + "duino-coin/blob/useful-tools/Donate_executables/"
-                       + "DonateExecutableAARCH64?raw=true")
-            elif osprocessor() == "armv7l":
-                url = ("https://github.com/revoxhere/"
-                       + "duino-coin/blob/useful-tools/Donate_executables/"
-                       + "DonateExecutableAARCH32?raw=true")
-            else:
-                url = ("https://github.com/revoxhere/"
-                       + "duino-coin/blob/useful-tools/Donate_executables/"
-                       + "DonateExecutableLinux?raw=true")
-            if not Path(RESOURCES_DIR + "/Donate_executable").is_file():
-                r = requests.get(url)
-                with open(RESOURCES_DIR + "/Donate_executable", "wb") as f:
-                    f.write(r.content)
-
 
 def loadConfig():
     # Config loading section
@@ -439,7 +421,7 @@ def loadConfig():
     global algorithm
     global SOC_TIMEOUT
     global discord_presence
-    global shuffle_ports
+    global PERIODIC_REPORT_TIME
 
     # Initial configuration
     if not Path(RESOURCES_DIR + "/Miner_config.cfg").is_file():
@@ -597,7 +579,7 @@ def loadConfig():
         elif requested_diff == "2":
             requested_diff = "MEDIUM"
         else:
-            requested_diff = "NET"
+            requested_diff = "MEDIUM"
 
         # Check whether donation_level is correct
         donation_level = sub(r"\D", "", donation_level)
@@ -620,8 +602,8 @@ def loadConfig():
             "language":         lang,
             "debug":            "n",
             "soc_timeout":      45,
-            "discord_presence": "y",
-            "shuffle_ports":    "y"
+            "periodic_report":  60,
+            "discord_presence": "y"
         }
 
         with open(RESOURCES_DIR + "/Miner_config.cfg", "w") as configfile:
@@ -640,71 +622,12 @@ def loadConfig():
         debug = config["Duino-Coin-PC-Miner"]["debug"]
         SOC_TIMEOUT = int(config["Duino-Coin-PC-Miner"]["soc_timeout"])
         discord_presence = config["Duino-Coin-PC-Miner"]["discord_presence"]
-        shuffle_ports = config["Duino-Coin-PC-Miner"]["shuffle_ports"]
+        PERIODIC_REPORT_TIME = int(
+            config["Duino-Coin-PC-Miner"]["periodic_report"])
 
     efficiency = (100 - float(efficiency)) * 0.01
 
-
-def Donate():
-    global donation_level
-    global donatorrunning
-    global donateExecutable
-
-    if osname == "nt":
-        cmd = (
-            "cd "
-            + RESOURCES_DIR
-            + "& Donate_executable.exe "
-            + "-o stratum+tcp://xmg.minerclaim.net:3333 "
-            + "-u revox.donate "
-            + "-p x -s 4 -e ")
-
-    elif osname == "posix":
-        cmd = (
-            "cd "
-            + RESOURCES_DIR
-            + "&& chmod +x Donate_executable "
-            + "&& ./Donate_executable "
-            + "-o stratum+tcp://xmg.minerclaim.net:3333 "
-            + "-u revox.donate "
-            + "-p x -s 4 -e ")
-
-    if int(donation_level) <= 0:
-        pretty_print(
-            "sys0",
-            Fore.YELLOW
-            + getString("free_network_warning")
-            + getString("donate_warning")
-            + Fore.GREEN
-            + "https://duinocoin.com/donate"
-            + Fore.YELLOW
-            + getString("learn_more_donate"),
-            "warning")
-        sleep(10)
-
-    elif donatorrunning == False:
-        if int(donation_level) == 5:
-            cmd += "80"
-        elif int(donation_level) == 4:
-            cmd += "60"
-        elif int(donation_level) == 3:
-            cmd += "40"
-        elif int(donation_level) == 2:
-            cmd += "20"
-        elif int(donation_level) == 1:
-            cmd += "10"
-        if int(donation_level) > 0:
-            debug_output(getString("starting_donation"))
-            donatorrunning = True
-            # Launch CMD as subprocess
-            donateExecutable = Popen(
-                cmd, shell=True, stderr=DEVNULL)
-            pretty_print(
-                "sys0",
-                getString("thanks_donation"),
-                "warning")
-
-
+    
 def ducos1(
         lastBlockHash,
         expectedHash,
@@ -779,6 +702,8 @@ def Thread(
         NODE_ADDRESS: str,
         NODE_PORT: int):
     # Mining section for every thread
+    start_time = time()
+    report_shares = 0
     while True:
         while True:
             try:
@@ -812,6 +737,10 @@ def Thread(
                 if threadid == 0:
                     soc.send(bytes("MOTD", encoding="utf8"))
                     motd = soc.recv(1024).decode().rstrip("\n")
+
+                    if "\n" in motd:
+                        motd = motd.replace("\n", "\n\t\t")
+
                     pretty_print("net" + str(threadid),
                                  " MOTD: "
                                  + Fore.RESET
@@ -852,8 +781,6 @@ def Thread(
                             "warning")
                         sleep(5)
                 break
-
-                
 
             except Exception as e:
                 # Socket connection error
@@ -1017,8 +944,9 @@ def Thread(
                                          " " +
                                          getString("max_hashrate_notice"),
                                          "warning")
-                        uptime, uptime_type = calculate_uptime(start_time)
+
                         diff = get_prefix(diff)
+
                         if feedback == "GOOD":
                             # If result was correct
                             accepted.value += 1
@@ -1074,12 +1002,7 @@ def Thread(
                                     + Fore.CYAN
                                     + "ping "
                                     + str("%02.0f" % int(ping))
-                                    + "ms"
-                                    + Fore.MAGENTA
-                                    + " ("
-                                    + str(uptime)
-                                    + uptime_type
-                                    + " elapsed)")
+                                    + "ms")
 
                         elif feedback == "BLOCK":
                             # If block was found
@@ -1195,6 +1118,20 @@ def Thread(
                                     + "ping "
                                     + str("%02.0f" % int(ping))
                                     + "ms")
+
+                        end_time = time()
+                        elapsed_time = end_time - start_time
+                        if (threadid == 0
+                                and elapsed_time >= PERIODIC_REPORT_TIME):
+                            report_shares = accepted.value - report_shares
+                            uptime = calculate_uptime(mining_start_time)
+
+                            periodic_report(start_time,
+                                            end_time,
+                                            report_shares,
+                                            totalhashrate,
+                                            uptime)
+                            start_time = time()
                         break
                     break
             except Exception as e:
@@ -1217,8 +1154,35 @@ def Thread(
                 break
 
 
+def periodic_report(start_time,
+                    end_time,
+                    shares,
+                    hashrate,
+                    uptime):
+    seconds = round(end_time - start_time)
+    pretty_print("sys0",
+                 " Periodic mining report (BETA): "
+                 + Fore.RESET
+                 + Style.NORMAL
+                 + "\n\t\t‖ During the last "
+                 + str(seconds)
+                 + " seconds"
+                 + "\n\t\t‖ You've mined "
+                 + str(shares)
+                 + " shares ("
+                 + str(round(shares/seconds, 1))
+                 + " shares/s)"
+                 + "\n\t\t‖ With the hashrate of "
+                 + str(int(hashrate)) + " kH/s"
+                 + "\n\t\t‖ In this time period, you've solved "
+                 + str(int(hashrate*seconds))
+                 + " hashes"
+                 + "\n\t\t‖ Total miner uptime: "
+                 + str(uptime), "success")
+
+
 def pretty_print(message_type, message, state):
-    # Print output messages in the DUCO "standard"
+    # Prints colored output messages
     # Usb/net/sys background
     if message_type.startswith("net"):
         background = Back.BLUE
@@ -1336,6 +1300,12 @@ def get_fastest_connection(server_ip: str):
 
 def fetch_pools():
     while True:
+        pretty_print("net0",
+            " "
+            + getString("connection_search")
+            + "...",
+            "warning")
+
         try:
             response = requests.get(
                 "https://server.duinocoin.com/getPool"
@@ -1370,10 +1340,9 @@ if __name__ == "__main__":
     if osname == "nt":
         # Unicode fix for windows
         ossystem("chcp 65001")
-        # Colorama
-        init(autoreset=True, convert=True)
-    else:
-        init(autoreset=True)
+
+    # Colorama
+    init(autoreset=True)
 
     try:
         from multiprocessing import (
@@ -1439,7 +1408,12 @@ if __name__ == "__main__":
 
     # Donation chunk used to be here
 
-    NODE_ADDRESS, NODE_PORT = fetch_pools()
+    try:
+        NODE_ADDRESS, NODE_PORT = fetch_pools()
+    except:
+        NODE_ADDRESS = "server.duinocoin.com"
+        NODE_PORT = 2813
+        debug_output("Using default server port and address")
 
     try:
         for x in range(int(threadcount)):
