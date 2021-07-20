@@ -19,6 +19,7 @@ import time
 from pathlib import Path
 from signal import SIGINT, signal
 from base64 import b64decode, b64encode
+from time import sleep as sleep
 
 try:
     from base64 import urlsafe_b64decode as b64d
