@@ -35,12 +35,12 @@
   <img src="https://img.shields.io/badge/Android App-e84393.svg?style=for-the-badge&logo=Android" /></a>
 <a href="https://github.com/revoxhere/duino-coin/blob/gh-pages/assets/whitepaper.pdf">
   <img src="https://img.shields.io/badge/whitepaper-1abc9c.svg?style=for-the-badge&logo=Academia" /></a>
-<a href="https://youtu.be/bFnCdqMke34">
+<a href="https://youtu.be/im0Tca7EjrA">
   <img src="https://img.shields.io/badge/Video-Watch-e74c3c.svg?style=for-the-badge&logo=Youtube" /></a>
 <a href="https://discord.gg/kvBkccy">
   <img src="https://img.shields.io/discord/677615191793467402.svg?color=5539cc&label=Discord&logo=Discord&style=for-the-badge" /></a>
 <a href="https://github.com/revoxhere/duino-coin/releases/latest">
-  <img src="https://img.shields.io/badge/release-2.5.6-ff4112.svg?style=for-the-badge" /></a>
+  <img src="https://img.shields.io/badge/release-2.5.7-ff4112.svg?style=for-the-badge" /></a>
 <br>
 
 <h3>
