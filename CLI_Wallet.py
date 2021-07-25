@@ -34,60 +34,6 @@ except:
     time.sleep(15)
     os._exit(1)
 
-
-try:
-    from base64 import urlsafe_b64decode as b64d
-    from base64 import urlsafe_b64encode as b64e
-except ModuleNotFoundError:
-    print(getString("base64_not_installed"))
-    time.sleep(15)
-    _exit(1)
-
-try:
-    from cryptography.fernet import Fernet, InvalidToken
-    from cryptography.hazmat.backends import default_backend
-    from cryptography.hazmat.primitives import hashes
-    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-except:
-    now = datetime.datetime.now()
-    print(now.strftime("%H:%M:%S ") + getString("cryptography_not_installed"))
-    time.sleep(15)
-    os._exit(1)
-
-try:
-    import secrets
-except:
-    now = datetime.datetime.now()
-    print(now.strftime("%H:%M:%S ") + getString("secrets_not_installed"))
-    time.sleep(15)
-    os._exit(1)
-
-try:
-    import websocket
-except:
-    now = datetime.datetime.now()
-    print(now.strftime("%H:%M:%S ") + getString("websocket_not_installed"))
-    time.sleep(15)
-    os._exit(1)
-
-try:  # Check if colorama is installed
-    from colorama import Back, Fore, Style, init
-except:
-    now = datetime.datetime.now()
-    print(now.strftime("%H:%M:%S ") + getString("colorama_not_installed"))
-    time.sleep(15)
-    os._exit(1)
-
-try:
-    import tronpy
-    from tronpy.keys import PrivateKey
-    tronpy_installed = True
-except:
-    tronpy_installed = False
-    now = datetime.datetime.now()
-    print(now.strftime("%H:%M:%S ") + getString("tronpy_not_installed"))
-
-backend = default_backend()
 wrong_passphrase = False
 iterations = 100_000
 timeout = 30  # Socket timeout
@@ -160,6 +106,61 @@ def getString(string_name):
         return lang_file["english"][string_name]
     else:
         return "String not found: " + string_name
+
+
+try:
+    from base64 import urlsafe_b64decode as b64d
+    from base64 import urlsafe_b64encode as b64e
+except ModuleNotFoundError:
+    print(getString("base64_not_installed"))
+    time.sleep(15)
+    _exit(1)
+
+try:
+    from cryptography.fernet import Fernet, InvalidToken
+    from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+except:
+    now = datetime.datetime.now()
+    print(now.strftime("%H:%M:%S ") + getString("cryptography_not_installed"))
+    time.sleep(15)
+    os._exit(1)
+
+try:
+    import secrets
+except:
+    now = datetime.datetime.now()
+    print(now.strftime("%H:%M:%S ") + getString("secrets_not_installed"))
+    time.sleep(15)
+    os._exit(1)
+
+try:
+    import websocket
+except:
+    now = datetime.datetime.now()
+    print(now.strftime("%H:%M:%S ") + getString("websocket_not_installed"))
+    time.sleep(15)
+    os._exit(1)
+
+try:  # Check if colorama is installed
+    from colorama import Back, Fore, Style, init
+except:
+    now = datetime.datetime.now()
+    print(now.strftime("%H:%M:%S ") + getString("colorama_not_installed"))
+    time.sleep(15)
+    os._exit(1)
+
+try:
+    import tronpy
+    from tronpy.keys import PrivateKey
+    tronpy_installed = True
+except:
+    tronpy_installed = False
+    now = datetime.datetime.now()
+    print(now.strftime("%H:%M:%S ") + getString("tronpy_not_installed"))
+
+backend = default_backend()
 
 
 def title(title):
@@ -477,9 +478,14 @@ while True:
                     wrong_passphrase = True
             else:
                 try:
-                    priv_key = str(password_decrypt(
-                        config["wrapper"]["priv_key"],
-                        b64decode(config["wallet"]["password"]).decode("utf8")))
+                    priv_key = str(
+                        password_decrypt(
+                            config["wrapper"]["priv_key"],
+                            b64decode(
+                                config["wallet"]["password"]
+                            ).decode("utf8")
+                        )
+                    )
                 except InvalidToken:
                     print(getString("invalid_passphrase_wrapper"))
                     use_wrapper = False
