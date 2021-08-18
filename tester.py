@@ -5,7 +5,7 @@ from time import sleep
 from datetime import datetime
 
 
-print('do this do that' + str(5) + ' aosnetuh')
+print('do this do that' + str(5) + ' aosnetuh\n')
 jobs = 'snthsnthxsnthsnthxsnthsnth'
 jobsList = jobs.split('x')
 print('jobsList: ' + str(jobsList))
@@ -40,8 +40,6 @@ def test_makeAndRemoveDirectoryX():
         sleep(5)
         rmdir("directory_x")
 
-
-
 def test_listPwd():
     pwd = njs.getPwd()
     print("absolute path of PWD: " + str(pwd))
@@ -75,3 +73,11 @@ DEBUG = False
 #         log.write(line)
 
 njs.log("snthsnthstnh")
+
+class Snth():
+    a = 10101
+    b = 7.0
+    # def __init__(self):
+
+snth = Snth()
+print(snth.a)

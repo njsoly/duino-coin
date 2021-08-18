@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 ##########################################
-# Duino-Coin Python AVR Miner (v2.5.6)
+# Duino-Coin Python AVR Miner (v2.6.1)
 # https://github.com/revoxhere/duino-coin
 # Distributed under MIT license
 # © Duino-Coin Community 2019-2021
@@ -95,18 +95,9 @@ except ModuleNotFoundError:
     install('pypresence')
 
 # Global variables
-MINER_VER = '2.56'  # Version number
-NODE_ADDRESS = "server.duinocoin.com"
-AVAILABLE_PORTS = [
-    2811,
-    2812,
-    2813,
-    2814,
-    2815,
-    2816,
-    2817
-]
+MINER_VER = '2.61'  # Version number
 SOC_TIMEOUT = 45
+PERIODIC_REPORT_TIME = 60
 AVR_TIMEOUT = 3.1  # diff 6 * 100 / 196 h/s = 3.06
 BAUDRATE = 115200
 RESOURCES_DIR = 'AVRMiner_' + str(MINER_VER) + '_resources'
@@ -124,6 +115,7 @@ donation_level = 0
 hashrate = 0
 config = ConfigParser()
 thread_lock = Lock()
+mining_start_time = time()
 
 # Create resources folder if it doesn't exist
 if not path.exists(RESOURCES_DIR):
@@ -168,6 +160,8 @@ try:
             lang = 'portuguese'
         elif locale.startswith('zh'):
             lang = 'chinese_simplified'
+        elif locale.startswith('th'):
+            lang = 'thai'
         else:
             lang = 'english'
     else:
@@ -189,7 +183,7 @@ def get_string(string_name: str):
     elif string_name in lang_file['english']:
         return lang_file['english'][string_name]
     else:
-        return 'String not found: ' + string_name
+        return ' String not found: ' + string_name
 
 
 def get_prefix(diff: int):
@@ -221,46 +215,6 @@ def title(title: str):
         # Most standard terminals
         print('\33]0;' + title + '\a', end='')
         sys.stdout.flush()
-
-
-def get_fastest_connection(server_ip: str):
-    connection_pool = []
-    available_connections = []
-
-    pretty_print("net0",
-                " "
-                + get_string("connection_search")
-                + "...",
-                "warning")
-
-    for i in range(len(AVAILABLE_PORTS)):
-        connection_pool.append(socket())
-        connection_pool[i].setblocking(0)
-        try:
-            connection_pool[i].connect((server_ip,
-                                        AVAILABLE_PORTS[i]))
-            connection_pool[i].settimeout(SOC_TIMEOUT)
-        except BlockingIOError as e:
-            pass
-
-    ready_connections, _, __ = select.select(connection_pool, [], [])
-
-    while True:
-        for connection in ready_connections:
-            try:
-                server_version = connection.recv(100).decode()
-            except:
-                continue
-            if server_version == b'':
-                continue
-
-            available_connections.append(connection)
-            connection.send(b'PING')
-
-        ready_connections, _, __ = select.select(available_connections, [], [])
-        ready_connections[0].recv(100)
-        ready_connections[0].settimeout(SOC_TIMEOUT)
-        return ready_connections[0].getpeername()[1]
 
 
 def handler(signal_received, frame):
@@ -295,6 +249,7 @@ def load_config():
     global shuffle_ports
     global SOC_TIMEOUT
     global AVR_TIMEOUT
+    global PERIODIC_REPORT_TIME
 
     # Initial configuration section
     if not Path(str(RESOURCES_DIR) + '/Miner_config.cfg').is_file():
@@ -381,13 +336,13 @@ def load_config():
             rig_identifier = 'None'
 
         donation_level = '0'
-        if osname == 'nt' or osname == 'posix':
-            donation_level = input(
-                Style.RESET_ALL
-                + Fore.YELLOW
-                + get_string('ask_donation_level')
-                + Fore.RESET
-                + Style.BRIGHT)
+        #if osname == 'nt' or osname == 'posix':
+        #    donation_level = input(
+        #        Style.RESET_ALL
+        #        + Fore.YELLOW
+        #        + get_string('ask_donation_level')
+        #        + Fore.RESET
+        #        + Style.BRIGHT)
 
         # Check wheter donation_level is correct
         donation_level = sub(r'\D', '', donation_level)
@@ -409,6 +364,7 @@ def load_config():
             "soc_timeout":      45,
             "avr_timeout":      3.1,
             "discord_presence": "y",
+            "periodic_report":  60,
             "shuffle_ports":    "y"
         }
 
@@ -432,6 +388,8 @@ def load_config():
         AVR_TIMEOUT = float(config["Duino-Coin-AVR-Miner"]["avr_timeout"])
         discord_presence = config["Duino-Coin-AVR-Miner"]["discord_presence"]
         shuffle_ports = config["Duino-Coin-AVR-Miner"]["shuffle_ports"]
+        PERIODIC_REPORT_TIME = int(
+            config["Duino-Coin-AVR-Miner"]["periodic_report"])
 
 
 def greeting():
@@ -499,17 +457,17 @@ def greeting():
         + Fore.YELLOW
         + ' '.join(avrport))
 
-    if osname == 'nt' or osname == 'posix':
-        print(
-            Style.DIM
-            + Fore.MAGENTA
-            + ' ‖ '
-            + Style.NORMAL
-            + Fore.RESET
-            + get_string('donation_level')
-            + Style.BRIGHT
-            + Fore.YELLOW
-            + str(donation_level))
+    #if osname == 'nt' or osname == 'posix':
+    #    print(
+    #        Style.DIM
+    #        + Fore.MAGENTA
+    #        + ' ‖ '
+    #        + Style.NORMAL
+    #        + Fore.RESET
+    #        + get_string('donation_level')
+    #        + Style.BRIGHT
+    #        + Fore.YELLOW
+    #        + str(donation_level))
     print(
         Style.DIM
         + Fore.MAGENTA
@@ -546,95 +504,6 @@ def greeting():
         + str(username)
         + '!\n')
 
-    if int(donation_level) > 0:
-        if osname == 'nt':
-            # Initial miner executable section
-            if not Path(RESOURCES_DIR + '/Donate_executable.exe').is_file():
-                url = ('https://github.com/'
-                       + 'revoxhere/'
-                       + 'duino-coin/blob/useful-tools/'
-                       + 'DonateExecutableWindows.exe?raw=true')
-                r = requests.get(url)
-                with open(RESOURCES_DIR + '/Donate_executable.exe', 'wb') as f:
-                    f.write(r.content)
-        elif osname == "posix":
-            if osprocessor() == "aarch64":
-                url = ("https://github.com/revoxhere/"
-                       + "duino-coin/blob/useful-tools/Donate_executables/"
-                       + "DonateExecutableAARCH64?raw=true")
-            elif osprocessor() == "armv7l":
-                url = ("https://github.com/revoxhere/"
-                       + "duino-coin/blob/useful-tools/Donate_executables/"
-                       + "DonateExecutableAARCH32?raw=true")
-            else:
-                url = ("https://github.com/revoxhere/"
-                       + "duino-coin/blob/useful-tools/Donate_executables/"
-                       + "DonateExecutableLinux?raw=true")
-            if not Path(RESOURCES_DIR + "/Donate_executable").is_file():
-                r = requests.get(url)
-                with open(RESOURCES_DIR + "/Donate_executable", "wb") as f:
-                    f.write(r.content)
-
-
-def donate():
-    global donation_level
-    global donator_running
-    global donateExecutable
-
-    if osname == 'nt':
-        cmd = (
-            'cd '
-            + RESOURCES_DIR
-            + '& Donate_executable.exe '
-            + '-o stratum+tcp://xmg.minerclaim.net:7008 '
-            + '-u revox.donate '
-            + '-p x -s 4 -e ')
-
-    elif osname == 'posix':
-        cmd = (
-            'cd '
-            + RESOURCES_DIR
-            + '&& chmod +x Donate_executable '
-            + '&& ./Donate_executable '
-            + '-o stratum+tcp://xmg.minerclaim.net:7008 '
-            + '-u revox.donate '
-            + '-p x -s 4 -e ')
-
-    if int(donation_level) <= 0:
-        pretty_print(
-            'sys0',
-            Fore.YELLOW
-            + get_string('free_network_warning')
-            + get_string('donate_warning')
-            + Fore.GREEN
-            + 'https://duinocoin.com/donate'
-            + Fore.YELLOW
-            + get_string('learn_more_donate'),
-            'warning')
-        sleep(5)
-
-    elif donator_running == False:
-        if int(donation_level) == 5:
-            cmd += '50'
-        elif int(donation_level) == 4:
-            cmd += '40'
-        elif int(donation_level) == 3:
-            cmd += '30'
-        elif int(donation_level) == 2:
-            cmd += '20'
-        elif int(donation_level) == 1:
-            cmd += '10'
-        if int(donation_level) > 0:
-            debug_output(get_string('starting_donation'))
-            donator_running = True
-            # Launch CMD as subprocess
-            donateExecutable = Popen(
-                cmd, shell=True, stderr=DEVNULL)
-            pretty_print(
-                'sys0',
-                get_string('thanks_donation'),
-                'warning')
-
 
 def init_rich_presence():
     # Initialize Discord rich presence
@@ -654,7 +523,7 @@ def update_rich_presence():
     while True:
         try:
             RPC.update(
-                details='Hashrate: ' + str(hashrate) + ' H/s',
+                details='Hashrate: ' + str(round(hashrate)) + ' H/s',
                 start=startTime,
                 state='Acc. shares: '
                 + str(shares[0])
@@ -712,15 +581,10 @@ def pretty_print(message_type, message, state):
 
 
 def mine_avr(com, threadid):
-    # Mining section
-    if shuffle_ports == "y":
-        debug_output(
-            'Searching for fastest connection to the server')
-        NODE_PORT = get_fastest_connection(str(NODE_ADDRESS))
-        debug_output('Fastest connection found')
-    else:
-        NODE_PORT = AVAILABLE_PORTS[0]
+    global hashrate
 
+    start_time = time()
+    report_shares = 0
     while True:
         try:
             while True:
@@ -760,6 +624,10 @@ def mine_avr(com, threadid):
 
                         soc.send(bytes("MOTD", encoding="ascii"))
                         motd = soc.recv(1024).decode().rstrip("\n")
+
+                        if "\n" in motd:
+                            motd = motd.replace("\n", "\n\t\t")
+
                         pretty_print("net" + str(threadid),
                                      " MOTD: "
                                      + Fore.RESET
@@ -963,7 +831,7 @@ def mine_avr(com, threadid):
                                 str(result[0])
                                 + ','
                                 + str(hashrate_t)
-                                + ',Official AVR Miner (DUCO-S1A) v'
+                                + ',Official AVR Miner v'
                                 + str(MINER_VER)
                                 + ','
                                 + str(rig_identifier)
@@ -1181,6 +1049,20 @@ def mine_avr(com, threadid):
                                 + 'ping '
                                 + str('%02.0f' % int(ping))
                                 + 'ms')
+
+                    end_time = time()
+                    elapsed_time = end_time - start_time
+                    if (threadid == 0
+                            and elapsed_time >= PERIODIC_REPORT_TIME):
+                        report_shares = shares[0] - report_shares
+                        uptime = calculate_uptime(mining_start_time)
+
+                        periodic_report(start_time,
+                                        end_time,
+                                        report_shares,
+                                        hashrate,
+                                        uptime)
+                        start_time = time()
                     break
 
         except Exception as e:
@@ -1193,6 +1075,74 @@ def mine_avr(com, threadid):
                 + ')',
                 'error')
             debug_output('Main loop error: ' + str(e))
+
+
+def periodic_report(start_time,
+                    end_time,
+                    shares,
+                    hashrate,
+                    uptime):
+    seconds = round(end_time - start_time)
+    pretty_print("sys0",
+                 " " 
+                 + get_string('periodic_mining_report')
+                 + Fore.RESET
+                 + Style.NORMAL
+                 + get_string('report_period')
+                 + str(seconds)
+                 + get_string('report_time')
+                 + get_string('report_body1')
+                 + str(shares)
+                 + get_string('report_body2')
+                 + str(round(shares/seconds, 1))
+                 + get_string('report_body3')
+                 + get_string('report_body4')
+                 + str(int(hashrate)) + " H/s"
+                 + get_string('report_body5')
+                 + str(int(hashrate*seconds))
+                 + get_string('report_body6')
+                 + get_string('total_mining_time')
+                 + str(uptime), "success")
+
+
+def calculate_uptime(start_time):
+    uptime = time() - start_time
+    if uptime <= 59:
+        return str(round(uptime)) + get_string('uptime_seconds')
+    elif uptime == 60:
+        return str(round(uptime // 60)) + get_string('uptime_minute')
+    elif uptime >= 60:
+        return str(round(uptime // 60)) + get_string('uptime_minutes')
+    elif uptime == 3600:
+        return str(round(uptime // 3600)) + get_string('uptime_hour')
+    elif uptime >= 3600:
+        return str(round(uptime // 3600)) + get_string('uptime_hours')
+
+
+def fetch_pools():
+    while True:
+        pretty_print("net0",
+                     " "
+                     + get_string("connection_search")
+                     + "...",
+                     "warning")
+
+        try:
+            response = requests.get(
+                "https://server.duinocoin.com/getPool"
+            ).json()
+
+            NODE_ADDRESS = response["ip"]
+            NODE_PORT = response["port"]
+
+            return NODE_ADDRESS, NODE_PORT
+        except Exception as e:
+            pretty_print("net0",
+                         " Error retrieving mining node: "
+                         + str(e)
+                         + ", retrying in 15s",
+                         "error")
+            sleep(15)
 
 
 if __name__ == '__main__':
@@ -1234,10 +1184,12 @@ if __name__ == '__main__':
         debug_output('Error displaying greeting message: ' + str(e))
 
     try:
-        # Start donation thread
-        donate()
+        NODE_ADDRESS, NODE_PORT = fetch_pools()
     except Exception as e:
-        debug_output('Error launching donation thread: ' + str(e))
+        print(e)
+        NODE_ADDRESS = "server.duinocoin.com"
+        NODE_PORT = 2813
+        debug_output("Using default server port and address")
 
     try:
         # Launch avr duco mining threads
