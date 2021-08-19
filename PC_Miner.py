@@ -704,7 +704,7 @@ def Thread(
         NODE_PORT: int):
     # Mining section for every thread
     start_time = time()
-    report_shares, totalhashrate = 0, 0
+    report_shares, totalhashrate, last_shares = 0, 0, 0
     while True:
         while True:
             try:
@@ -1126,7 +1126,7 @@ def Thread(
                         elapsed_time = end_time - start_time
                         if (threadid == 0
                                 and elapsed_time >= PERIODIC_REPORT_TIME):
-                            report_shares = accepted.value - report_shares
+                            report_shares = accepted.value - last_shares
                             uptime = calculate_uptime(mining_start_time)
 
                             periodic_report(start_time,
@@ -1135,6 +1135,7 @@ def Thread(
                                             totalhashrate,
                                             uptime)
                             start_time = time()
+                            last_shares = accepted.value
                         break
                     break
             except Exception as e:
