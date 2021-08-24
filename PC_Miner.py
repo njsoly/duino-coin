@@ -20,8 +20,8 @@ from os import execl, mkdir, _exit
 from subprocess import DEVNULL, Popen, check_call
 import pip
 import select
-import testerlib as njs
-from testerlib import log as log
+# import testerlib as njs
+# from testerlib import log as log
 import sys
 import os
 import json
