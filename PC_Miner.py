@@ -471,9 +471,9 @@ class Miner:
                     lang = "english"
             else:
                 try:
-                    ConfigParser().read(Settings.DATA_DIR
+                    configparser.read(Settings.DATA_DIR
                                         + Settings.SETTINGS_FILE)
-                    lang = ConfigParser()["Duino-Coin-PC-Miner"]["language"]
+                    lang = configparser["PC Miner"]["language"]
                 except Exception:
                     lang = "english"
         except Exception as e:
@@ -626,7 +626,7 @@ class Miner:
                      "success", "sys"+str(id))
 
         last_report = time()
-        report_shares = 0
+        report_shares, last_report_shares = 0, 0
         while True:
             try:
                 Miner.m_connect(id, pool)
@@ -702,12 +702,13 @@ class Miner:
                         end_time = time()
                         elapsed_time = end_time - last_report
                         if elapsed_time >= Settings.REPORT_TIME:
-                            report_shares = accept.value - report_shares
+                            report_shares = accept.value - last_report_shares
                             uptime = calculate_uptime(mining_start_time)
                             periodic_report(last_report, end_time,
                                             report_shares,
                                             sum(hashrate.values()), uptime)
                             last_report = time()
+                            last_report_shares = accept.value 
 
             except KeyboardInterrupt:
                 _exit(0)
