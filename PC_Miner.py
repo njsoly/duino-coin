@@ -48,8 +48,6 @@ def handler(signal_received, frame):
             + Fore.RESET
             + get_string("goodbye"),
             "warning")
-    for p in p_list:
-        p.terminate()
     _exit(0)
 
 
@@ -222,7 +220,7 @@ class Client:
                 return (response["ip"], response["port"])
             except KeyboardInterrupt:
                 _exit(0)
-            else:
+            except Exception as e:
                 pretty_print("Error retrieving mining node: "
                              + str(e) + ", retrying in 15s",
                              "error", "net0")
@@ -588,7 +586,7 @@ class Miner:
 
         if id == 0:
             Client.send("MOTD")
-            motd = Client.recv().replace("\n", "\n\t\t")
+            motd = Client.recv(512).replace("\n", "\n\t\t")
 
             pretty_print("MOTD: " + Fore.RESET + Style.NORMAL + str(motd),
                          "success", "net" + str(id))
@@ -724,15 +722,12 @@ class Miner:
                                 break
                             break
                     except Exception as e:
-                        pretty_print(get_string("error_while_mining"),
+                        pretty_print(get_string("error_while_mining") + str(e),
                                      "error", "net" + str(id))
                         sleep(5)
                         break
-            except KeyboardInterrupt:
-                _exit(0)
-            else:
-                pretty_print("Error, restarting", "error")
-
+            except Exception as e:
+                pass
 
 class Discord_rp:
     def connect():
