@@ -48,8 +48,6 @@ def handler(signal_received, frame):
             + Fore.RESET
             + get_string("goodbye"),
             "warning")
-    for p in p_list:
-        p.terminate()
     _exit(0)
 
 
@@ -102,15 +100,24 @@ except ModuleNotFoundError:
           + "python3 -m pip install pypresence")
     install("pypresence")
 
-
+working_psutil = True
 try:
-    import psutil
+    sys.stderr = open(os.devnull, "w") #Suppress psutil import error output
+    import psutil #Doing this will generate an error for devices that don't have access to the /proc folder
 except ModuleNotFoundError:
     print("Psutil is not installed. "
           + "Miner will try to automatically install it "
           + "If it fails, please manually execute "
           + "python3 -m pip install psutil")
     install("psutil")
+
+try:
+    psutil.cpu_percent() #Try to generate the error again
+except: #Catch it this time
+    sys.stderr = sys.__stderr__ #Resumes output
+    working_psutil = False
+    print("Looks like psutil is having trouble retrieving cpu info. If you are running the miner on Termux, ignore this message. Proceeding...")
+
 
 
 class Settings:
@@ -152,10 +159,10 @@ class Algorithms:
         base_hash = sha1(last_h.encode('ascii'))
 
         for nonce in range(100 * diff + 1):
-            if (int(eff) != 100
-                    and nonce % (1_000 * int(eff)) == 0):
-                if psutil.cpu_percent() > int(eff):
-                    sleep(1/100*int(eff))
+            if (int(eff) != 100 and nonce % (1_000 * int(eff)) == 0):
+                if working_psutil != False:
+                    if psutil.cpu_percent() > int(eff):
+                        sleep(1/100*int(eff))
 
             temp_h = base_hash.copy()
             temp_h.update(str(nonce).encode('ascii'))
@@ -174,8 +181,9 @@ class Algorithms:
         for nonce in range(100 * diff + 1):
             if (int(eff) != 100
                     and nonce % (1_000 * int(eff)) == 0):
-                if psutil.cpu_percent() > int(eff):
-                    sleep(1/100/int(eff))
+                if working_psutil != False:
+                    if psutil.cpu_percent() > int(eff):
+                        sleep(1/100/int(eff))
 
             d_res = xxh64(last_h + str(nonce),
                           seed=2811).hexdigest()
@@ -222,7 +230,7 @@ class Client:
                 return (response["ip"], response["port"])
             except KeyboardInterrupt:
                 _exit(0)
-            else:
+            except Exception as e:
                 pretty_print("Error retrieving mining node: "
                              + str(e) + ", retrying in 15s",
                              "error", "net0")
@@ -397,10 +405,16 @@ class Miner:
                   + " translation: " + Fore.YELLOW
                   + get_string("translation_autor"))
 
-        print(Style.DIM + Fore.YELLOW + Settings.BLOCK
-              + Style.NORMAL + Fore.RESET + "CPU: " + Style.BRIGHT
-              + Fore.YELLOW + str(user_settings["threads"])
-              + "x " + str(cpu["brand_raw"]))
+        if working_psutil != False:
+            print(Style.DIM + Fore.YELLOW + Settings.BLOCK
+                  + Style.NORMAL + Fore.RESET + "CPU: " + Style.BRIGHT
+                  + Fore.YELLOW + str(user_settings["threads"])
+                  + "x " + str(cpu["brand_raw"]))
+        else:
+            print(Style.DIM + Fore.YELLOW + Settings.BLOCK
+                  + Style.NORMAL + Fore.RESET + "CPU: " + Style.BRIGHT
+                  + Fore.YELLOW + str(user_settings["threads"])
+                  + "x threads")
 
         if os.name == "nt" or os.name == "posix":
             print(Style.DIM + Fore.YELLOW
@@ -512,9 +526,12 @@ class Miner:
                 if algorithm == "2":
                     algorithm = "XXHASH"
 
-            intensity = sub(r"\D", "",
-                            input(Style.NORMAL + get_string("ask_intensity")
-                                   + Style.BRIGHT))
+            intensity = None
+            if working_psutil != False:
+                intensity = sub(r"\D", "",
+                                input(Style.NORMAL + get_string("ask_intensity")
+                                       + Style.BRIGHT))
+
             if not intensity:
                 intensity = 95
             elif float(intensity) > 100:
@@ -588,7 +605,7 @@ class Miner:
 
         if id == 0:
             Client.send("MOTD")
-            motd = Client.recv().replace("\n", "\n\t\t")
+            motd = Client.recv(512).replace("\n", "\n\t\t")
 
             pretty_print("MOTD: " + Fore.RESET + Style.NORMAL + str(motd),
                          "success", "net" + str(id))
@@ -724,15 +741,12 @@ class Miner:
                                 break
                             break
                     except Exception as e:
-                        pretty_print(get_string("error_while_mining"),
+                        pretty_print(get_string("error_while_mining") + str(e),
                                      "error", "net" + str(id))
                         sleep(5)
                         break
-            except KeyboardInterrupt:
-                _exit(0)
-            else:
-                pretty_print("Error, restarting", "error")
-
+            except Exception as e:
+                pass
 
 class Discord_rp:
     def connect():
