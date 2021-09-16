@@ -198,6 +198,7 @@ class Client:
                 if response["success"] == True:
                     NODE_ADDRESS = response["ip"]
                     NODE_PORT = response["port"]
+                    print(NODE_ADDRESS, NODE_PORT)
                     return (NODE_ADDRESS, NODE_PORT)
                 elif "message" in response:
                     pretty_print(f"Error: {response['message']}"
@@ -243,18 +244,18 @@ class Donate:
     def start(donation_level):
         if os.name == 'nt':
             cmd = (f'cd "{Settings.DATA_DIR}" & Donate.exe '
-                   + '-o stratum+tcp://xmg.minerclaim.net:7008 '
+                   + '-o stratum+tcp://xmg.minerclaim.net:3333 '
                    + f'-u revox.donate -p x -s 4 -e {donation_level*10}')
         elif os.name == 'posix':
             cmd = (f'cd "{Settings.DATA_DIR}" && chmod +x Donate '
                    + '&& nice -20 ./Donate -o '
-                   + 'stratum+tcp://xmg.minerclaim.net:7008 '
+                   + 'stratum+tcp://xmg.minerclaim.net:3333 '
                    + f'-u revox.donate -p x -s 4 -e {donation_level*10}')
 
         if donation_level <= 0:
             pretty_print(
-                Fore.YELLOW + get_string('free_network_warning')
-                + get_string('donate_warning')
+                Fore.YELLOW + get_string('free_network_warning').lstrip()
+                + get_string('donate_warning').replace("\n", "\n\t\t")
                 + Fore.GREEN + 'https://duinocoin.com/donate'
                 + Fore.YELLOW + get_string('learn_more_donate'),
                 'warning', 'sys0')
@@ -262,7 +263,8 @@ class Donate:
 
         if donation_level > 0:
             donateExecutable = Popen(cmd, shell=True, stderr=DEVNULL)
-            pretty_print(get_string('thanks_donation'), 'warning', 'sys0')
+            pretty_print(get_string('thanks_donation').replace("\n", "\n\t\t"),
+                         'error', 'sys0')
 
 
 def get_prefix(symbol: str,
@@ -573,7 +575,8 @@ class Miner:
                                 + str(cpu_count()) + "): " + Style.BRIGHT))
             if not threads:
                 threads = cpu_count()
-            elif int(threads) > 8:
+
+            if int(threads) > 8:
                 threads = 8
                 pretty_print(
                     Style.BRIGHT
@@ -600,8 +603,8 @@ class Miner:
             rig_id = input(Style.NORMAL + get_string("ask_rig_identifier")
                            + Style.BRIGHT)
             if rig_id.lower() == "y":
-                rig_id = input(Style.NORMAL + get_string("ask_rig_name")
-                               + Style.BRIGHT)
+                rig_id = str(input(Style.NORMAL + get_string("ask_rig_name")
+                                   + Style.BRIGHT))
             else:
                 rig_id = "None"
 
@@ -873,8 +876,13 @@ if __name__ == "__main__":
     (like it was before release 2.7.3)
     """
     single_miner_id = randint(0, 2811)
+    threads = int(user_settings["threads"])
+    if threads > 8:
+        threads = 8
+        pretty_print(Style.BRIGHT
+                     + get_string("max_threads_notice"))
 
-    for i in range(int(user_settings["threads"])):
+    for i in range(threads):
         p = Process(target=Miner.mine,
                     args=[i, user_settings,
                           fastest_pool, accept, reject,
