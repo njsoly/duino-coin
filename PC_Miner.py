@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Duino-Coin Official PC Miner 2.7.3 © MIT licensed
+Duino-Coin Official PC Miner 2.73 © MIT licensed
 https://duinocoin.com
 https://github.com/revoxhere/duino-coin
 Duino-Coin Team & Community 2019-2021
@@ -198,16 +198,16 @@ class Client:
                 if response["success"] == True:
                     NODE_ADDRESS = response["ip"]
                     NODE_PORT = response["port"]
-                    print(NODE_ADDRESS, NODE_PORT)
                     return (NODE_ADDRESS, NODE_PORT)
                 elif "message" in response:
-                    pretty_print(f"Error: {response['message']}"
-                                 + ", retrying in 15s", "error", "net0")
+                    pretty_print(f"Warning: {response['message']}"
+                                 + ", retrying in 15s", "warning", "net0")
                     sleep(10)
                 else:
-                    raise
+                    raise Exception(
+                        "no response - IP ban or connection error")
             except Exception as e:
-                pretty_print(f" Error fetching mining node: {e}"
+                pretty_print(f"Error fetching mining node: {e}"
                              + ", retrying in 15s", "error", "net0")
                 sleep(15)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Duino-Coin Official AVR Miner 2.7.3 © MIT licensed
+Duino-Coin Official AVR Miner 2.73 © MIT licensed
 https://duinocoin.com
 https://github.com/revoxhere/duino-coin
 Duino-Coin Team & Community 2019-2021
@@ -137,14 +137,17 @@ class Client:
                     NODE_ADDRESS = response["ip"]
                     NODE_PORT = response["port"]
                     debug_output(f"Fetched pool: {response['name']}")
-                    return (response["ip"], response["port"])
+                    return (NODE_ADDRESS, NODE_PORT)
                 elif "message" in response:
-                    pretty_print(f"Error: {response['message']}"
-                                 + ", retrying in 15s", "error", "net0")
+                    pretty_print(f"Warning: {response['message']}"
+                                 + ", retrying in 15s", "warning", "net0")
                     sleep(15)
+                else:
+                    raise Exception(
+                        "no response - IP ban or connection error")
             except Exception as e:
                 pretty_print("net0",
-                             f" Error fetching mining node: {e}"
+                             f"Error fetching mining node: {e}"
                              + ", retrying in 15s", "error")
                 sleep(15)
 
@@ -182,12 +185,12 @@ class Donate:
         if osname == 'nt':
             cmd = (f'cd "{Settings.DATA_DIR}" & Donate.exe '
                    + '-o stratum+tcp://xmg.minerclaim.net:3333 '
-                   + f'-u revox.donate -p x -s 4 -e {donation_level*10}')
+                   + f'-u revox.donate -p x -s 4 -e {donation_level*5}')
         elif osname == 'posix':
             cmd = (f'cd "{Settings.DATA_DIR}" && chmod +x Donate '
                    + '&& nice -20 ./Donate -o '
                    + 'stratum+tcp://xmg.minerclaim.net:3333 '
-                   + f'-u revox.donate -p x -s 4 -e {donation_level*10}')
+                   + f'-u revox.donate -p x -s 4 -e {donation_level*5}')
 
         if donation_level <= 0:
             pretty_print(
@@ -656,6 +659,9 @@ def mine_avr(com, threadid, fastest_pool):
         while True:
             try:
                 ser.close()
+                pretty_print('sys' + port_num(com),
+                    f"Closed COM port {com}", 'success')
+                sleep(2)
             except:
                 pass
             try:
@@ -779,6 +785,8 @@ def mine_avr(com, threadid, fastest_pool):
                         _ = int(result[0], 2)
                         debug_output(com + f': Result: {result[0]}')
                         break
+                    else:
+                        raise Exception("No data received from AVR")
                 except Exception as e:
                     debug_output(com + f': Retrying data read: {e}')
                     retry_counter += 1
@@ -795,9 +803,9 @@ def mine_avr(com, threadid, fastest_pool):
                 pretty_print('sys' + port_num(com),
                              get_string('mining_avr_connection_error')
                              + Style.NORMAL + Fore.RESET
-                             + ' (error reading result from the board: '
-                             + f'{e}, please check connection '
-                             + 'and port setting)', 'warning')
+                             + ' (no response from the board: '
+                             + f'{e}, please check the connection, '
+                             + 'port setting or reset the AVR)', 'warning')
                 break
 
             try:
