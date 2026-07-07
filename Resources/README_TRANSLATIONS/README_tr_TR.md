@@ -1,6 +1,6 @@
 <!--
 *** Official Duino Coin README
-*** by revoxhere, 2019-2021
+*** by revoxhere, 2019-2022
 -->
 
 <a href="https://duinocoin.com">
@@ -14,6 +14,8 @@
   <br>
   <a href="https://github.com/revoxhere/duino-coin/blob/master/README.md">
     <img src="https://img.shields.io/badge/English-f39c12.svg?style=for-the-badge" /></a>
+  <a href="https://github.com/revoxhere/duino-coin/blob/master/Resources/README_TRANSLATIONS/README_fi_FI.md">
+    <img src="https://img.shields.io/badge/finnish-121212.svg?style=for-the-badge" /></a>
 </h1>
 <a href="https://wallet.duinocoin.com">
   <img src="https://img.shields.io/badge/Online Wallet-8e44ad.svg?style=for-the-badge&logo=Web" /></a>
@@ -90,7 +92,6 @@ Bunu yaptıktan sonra istediğiniz yazılımı çalıştırabilirsiniz (istediğ
   *   [ESPython DUCO Miner](https://github.com/fabiopolancoe/ESPython-DUCO-Miner) - fabiopolancoe tarafından ESP kartları için MicroPython'da yazılmmış madenci
   *   [DUCO Miner for Nintendo 3DS](https://github.com/BunkerInnovations/duco-3ds) - PhereloHD & HGEpro tarafından Nintendo 3DS için madenci yazılımı
   *   [Dockerized DUCO Miner](https://github.com/Alicia426/Dockerized_DUCO_Miner_minimal) - Alicia426 tarafından Docker içinde çalışan madenci
-  *   [nonceMiner](https://github.com/colonelwatch/nonceMiner) - colonelwatch tarafından şu ana kadar ki en hızlı madenci yazılımı
   *   [NodeJS-DuinoCoin-Miner](https://github.com/DarkThinking/NodeJS-DuinoCoin-Miner/) - DarkThinking tarafından basit bir NodeJS'de yazılmış madenci
   *   [d-cpuminer](https://github.com/phantom32-0/d-cpuminer) - phantom32 & revoxhere tarafından saf C içinde yazılmış madenci
   *   [Go Miner](https://github.com/yippiez/go-miner) yippiez tarafından Go'da yazılmış madenci
@@ -212,7 +213,7 @@ Bazı üçüncü-parti dosyalar farklı lisanslar kullanıyor olabilir - lütfen
 *   [@Bilaboz](https://github.com/bilaboz/) (Ana NodeJS geliştiricisi)
 *   [@connorhess](https://github.com/connorhess) (Ana Python geliştiricisi, Node-S sahibi)
 *   [@JoyBed](https://github.com/JoyBed) (Ana AVR geliştiricisi)
-*   [@Tech1k](https://github.com/Tech1k/) - kristian@beyondcoin.io (Lead Webmaster and DUCO Developer) <!-- translation wanted -->
+*   [@Tech1k](https://github.com/Tech1k/) - hello@kristiankramer.net (Lead Webmaster and DUCO Developer) <!-- translation wanted -->
 ##
 *   [@ygboucherk](https://github.com/ygboucherk) ([wDUCO](https://github.com/ygboucherk/wrapped-duino-coin-v2) geliştiricisi)
 *   [@DoctorEenot](https://github.com/DoctorEenot) (Geliştirici)

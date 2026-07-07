@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
 # Minimal version of Duino-Coin PC Miner, useful for developing own apps.
-# Created by revox 2020-2021
+# Created by revox 2020-2022
 # Modifications made by Robert Furr (robtech21) and YeahNotSewerSide
-# Mining Pools added by mkursadulusoy - 2021-09-06
+# Mining Pools added by mkursadulusoy - 2022-09-06
 
 import hashlib
 import os
 from socket import socket
 import sys  # Only python3 included libraries
 import time
-import ssl
-import select
-from json import load as jsonload
-import requests
+from urllib.request import Request, urlopen
+from json import loads
 
 
 soc = socket()
-
 
 
 def current_time():
@@ -25,6 +22,7 @@ def current_time():
     return current_time
 
 username = input('Username?\n> ')
+mining_key = input("Mining key? ['None' for no key]\n> ")
 diff_choice = input(
     'Use lower difficulty? (Y/N) [Leave empty for default of True]\n> ')
 if diff_choice.lower == "n":
@@ -35,9 +33,7 @@ else:
 def fetch_pools():
     while True:
         try:
-            response = requests.get(
-                "https://server.duinocoin.com/getPool"
-            ).json()
+            response = loads(urlopen(Request("https://server.duinocoin.com/getPool")).read().decode())
             NODE_ADDRESS = response["ip"]
             NODE_PORT = response["port"]
 
@@ -66,13 +62,16 @@ while True:
                 soc.send(bytes(
                     "JOB,"
                     + str(username)
-                    + ",MEDIUM",
+                    + ",LOW,"
+                    + str(mining_key),
                     encoding="utf8"))
             else:
                 # Send job request
                 soc.send(bytes(
                     "JOB,"
-                    + str(username),
+                    + str(username)
+                    + ",MEDIUM,"
+                    + str(mining_key),
                     encoding="utf8"))
 
             # Receive work

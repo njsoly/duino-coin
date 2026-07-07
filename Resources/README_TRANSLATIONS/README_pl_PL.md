@@ -1,6 +1,6 @@
 <!--
 *** Official Duino Coin README
-*** by revox, 2019-2021
+*** by revox, 2019-2022
 -->
 
 <p align = "center">
@@ -113,7 +113,6 @@ Pakiet Duino-Coin dla AUR jest utrzymywany przez by [PhereloHD](https://github.c
 *   [ESPython DUCO Miner](https://github.com/fabiopolancoe/ESPython-DUCO-Miner) by fabiopolancoe
 *   [DUCO Miner for Nintendo 3DS](https://github.com/BunkerInnovations/duco-3ds) by PhereloHD & HGEpro
 *   [Dockerized DUCO Miner](https://github.com/Alicia426/Dockerized_DUCO_Miner_minimal) by Alicia426
-*   [nonceMiner](https://github.com/colonelwatch/nonceMiner) by colonelwatch
 *   [NodeJS-DuinoCoin-Miner](https://github.com/DarkThinking/NodeJS-DuinoCoin-Miner/) by DarkThinking
 *   [d-cpuminer](https://github.com/phantom32-0/d-cpuminer) by phantom32
 *   [Go Miner](https://github.com/yippiez/go-miner) by yippiez
@@ -140,7 +139,7 @@ wDUCO to DUCO "zwrapowane" na sieci innej kryptowaluty - Tron. Aktualnie nie ma 
 
 ### Konfiguracja Wrappera wDUCO
 
-1. Otwórz swój GUI (graficzny) or CLI (konsolowy) Portfel DUCO
+1. Otwórz swój GUI (graficzny) lub CLI (konsolowy) Portfel DUCO
 2. Jeżeli używasz portfela GUI:
     1. Otwórz ustawienia
     2. Kliknij na przycisk **Ustawienia Wrappera**
@@ -226,7 +225,7 @@ Niektóre pliki niepochodzące od nas mogą mieć inne licencje - sprawdź ich k
     *   [@LDarki](https://github.com/LDarki) (web deweloper)
     *   [@travelmode](https://github.com/colonelwatch) (deweloper)
     *   [@ygboucherk](https://github.com/ygboucherk) (deweloper [wDUCO](https://github.com/ygboucherk/wrapped-duino-coin-v2))
-    *   [@Tech1k](https://github.com/Tech1k/) - kristian@beyondcoin.io (Lead Webmaster and DUCO Developer) <!-- translation wanted -->
+    *   [@Tech1k](https://github.com/Tech1k/) - hello@kristiankramer.net (Lead Webmaster and DUCO Developer) <!-- translation wanted -->
 
 *   **Współautorzy:**
     *   [@5Q](https://github.com/its5Q)

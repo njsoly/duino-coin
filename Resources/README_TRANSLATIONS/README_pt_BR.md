@@ -25,6 +25,10 @@
     <img src="https://img.shields.io/badge/-Deutsch-ff00c8.svg?style=for-the-badge" /></a>
   <a href="https://github.com/revoxhere/duino-coin/blob/master/Resources/README_TRANSLATIONS/README_id_ID.md">
     <img src="https://img.shields.io/badge/-bahasa Indonesia-ff0ae3.svg?style=for-the-badge" /></a>
+  <a href="https://github.com/revoxhere/duino-coin/blob/master/Resources/README_TRANSLATIONS/README_ja_JP.md">
+    <img src="https://img.shields.io/badge/-日本語-orange?style=for-the-badge" /></a>
+  <a href="https://github.com/revoxhere/duino-coin/blob/master/Resources/README_TRANSLATIONS/README_fi_FI.md">
+    <img src="https://img.shields.io/badge/finnish-121212.svg?style=for-the-badge" /></a>
 </h1>
 <a href="https://wallet.duinocoin.com">
   <img src="https://img.shields.io/badge/Online Wallet-a202ff.svg?style=for-the-badge&logo=Web" /></a>
@@ -161,7 +165,6 @@ O código-fonte do servidor, a documentação para chamadas de API e bibliotecas
   *   [ESPython DUCO Miner](https://github.com/fabiopolancoe/ESPython-DUCO-Miner) - Minerador em MicroPython para placas ESP, feito por fabiopolancoe
   *   [DUCO Miner for Nintendo 3DS](https://github.com/BunkerInnovations/duco-3ds) - Minerador em Python para Nintendo 3DS, feito por PhereloHD & HGEpro
   *   [Dockerized DUCO Miner](https://github.com/Alicia426/Dockerized_DUCO_Miner_minimal) - Mineradora em Docker, feito por Alicia426
-  *   [nonceMiner](https://github.com/colonelwatch/nonceMiner) - A mineradora de Duino-Coin mais rápida disponível, feita por colonelwatch
   *   [NodeJS-DuinoCoin-Miner](https://github.com/DarkThinking/NodeJS-DuinoCoin-Miner/) - Minerador simples em NodeJS, feita pelo DarkThinking
   *   [d-cpuminer](https://github.com/phantom32-0/d-cpuminer) - Mineradora em C, feito por phantom32 & revoxhere
   *   [Go Miner](https://github.com/yippiez/go-miner) por yippiez
@@ -228,7 +231,7 @@ Alguns arquivos incluídos de terceiros podem ter licenças diferentes - por fav
 *   [@Bilaboz](https://github.com/bilaboz/) (Lead NodeJS dev)
 *   [@connorhess](https://github.com/connorhess) (Lead Python dev, Node-S owner)
 *   [@JoyBed](https://github.com/JoyBed) (Lead AVR dev)
-*   [@Tech1k](https://github.com/Tech1k/) - kristian@beyondcoin.io (Lead Webmaster and DUCO Developer)
+*   [@Tech1k](https://github.com/Tech1k/) - hello@kristiankramer.net (Lead Webmaster and DUCO Developer)
 *   [@ygboucherk](https://github.com/ygboucherk) ([wDUCO](https://github.com/ygboucherk/wrapped-duino-coin-v2) dev)
 *   [@Lulaschkas](https://github.com/Lulaschkas) (Dev)
 *   [@joaquinbvw](https://github.com/joaquinbvw) (AVR dev)
